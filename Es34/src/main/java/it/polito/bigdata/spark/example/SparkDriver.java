@@ -22,33 +22,35 @@ public class SparkDriver {
 
 	
 		// Create a configuration object and set the name of the application
-		SparkConf conf=new SparkConf().setAppName("Es34");
+		SparkConf conf=new SparkConf().setAppName("Es34").setMaster("local");
 		
 		// Use the following command to create the SparkConf object if you want to run
 		// your application inside Eclipse.
 		// Remember to remove .setMaster("local") before running your application on the cluster
-		// SparkConf conf=new SparkConf().setAppName("Spark Lab #5").setMaster("local");
+		// SparkConf conf=new SparkConf().setAppName("Es34").setMaster("local");
 		
 		// Create a Spark Context object
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
 		
 		// Read the content of the input file/folder
-		// Each element/string of wordFreqRDD corresponds to one line of the input data 
-		// (i.e, one pair "word\tfreq")  
-		JavaRDD<String> wordFreqRDD = sc.textFile(inputPath);
+		JavaRDD<String> inputRDD = sc.textFile(inputPath).cache();
 
-		/*
-		 * Task 1
-		 .......
-		 .......
-		*/
+		float max = inputRDD.map(line -> {
+			String[] sensor = line.split(",");
+			return Float.parseFloat(sensor[2]);
+		}).reduce((e1, e2) ->{
+			if(e1 > e2) return e1;
+			else return e2;
+		});
 		
-		/*
-		 * Task 2
-		 .......
-		 .......
-		 */
+		JavaRDD<String> outputRDD = inputRDD.filter(line -> {
+			String[] sensor = line.split(",");
+			if(Float.parseFloat(sensor[2]) == max) return true;
+			else return false;
+		});
+		
+		outputRDD.saveAsTextFile(outputPath);
 
 		// Close the Spark context
 		sc.close();
