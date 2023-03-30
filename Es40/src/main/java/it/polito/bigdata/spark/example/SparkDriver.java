@@ -47,7 +47,7 @@ public class SparkDriver {
 		}).mapToPair(line -> {
 			String[] sensor = line.split(",");
 			return new Tuple2<String, Integer>(sensor[0], 1);
-		}).reduceByKey((e1, e2) -> e1+e2).mapToPair(e -> new Tuple2<Integer, String>(e._2(), e._1()));
+		}).reduceByKey((e1, e2) -> e1+e2).mapToPair(e -> new Tuple2<Integer, String>(e._2(), e._1())).sortByKey(false);
 
 		outputRDD.saveAsTextFile(outputPath);
 		
