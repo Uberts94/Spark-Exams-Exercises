@@ -15,10 +15,8 @@ public class SparkDriver {
 
 
 		String inputPath;
-		String outputPath;
 		
 		inputPath=args[0];
-		outputPath=args[1];
 	
 		// Create a configuration object and set the name of the application
 		SparkConf conf=new SparkConf().setAppName("Es32").setMaster("local");
@@ -33,10 +31,24 @@ public class SparkDriver {
 
 		
 		// Read the content of the input file/folder
-		JavaRDD<String> inputRDD = sc.textFile(inputPath);
+		JavaRDD<String> inputRDD = sc.textFile(inputPath).cache();
 
+		float max = inputRDD.map(line -> {
+			String[] entry = line.split(",");
+			return Float.parseFloat(entry[2]);
+		}).top(1).get(0);
 		
+		float maxReduce = inputRDD.map(line -> {
+			String[] entry = line.split(",");
+			return Float.parseFloat(entry[2]);
+		}).reduce((e1, e2) -> {
+			if(e1 > e2) return e1;
+			else return e2;
+		});
 
+		System.out.println("Max result with top(1):	"+max);
+		System.out.println("Max result with reduce:	"+maxReduce);
+		
 		// Close the Spark context
 		sc.close();
 	}
