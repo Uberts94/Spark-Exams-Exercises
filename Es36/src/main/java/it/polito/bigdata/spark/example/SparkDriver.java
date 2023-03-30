@@ -15,10 +15,8 @@ public class SparkDriver {
 
 
 		String inputPath;
-		String outputPath;
 		
 		inputPath=args[0];
-		outputPath=args[1];
 
 	
 		// Create a configuration object and set the name of the application
@@ -34,8 +32,16 @@ public class SparkDriver {
 
 		
 		// Read the content of the input file/folder
-		JavaRDD<String> inputRDD = sc.textFile(inputPath);
-
+		JavaRDD<String> inputRDD = sc.textFile(inputPath).cache();
+		
+		int measurements = (int) inputRDD.count();
+		
+		float sum = inputRDD.map(line -> {
+			String[] sensor = line.split(",");
+			return Float.parseFloat(sensor[2]);
+		}).reduce((e1, e2) -> e1+e2);
+		
+		System.out.println("Average pollution: "+sum/measurements);
 		
 		// Close the Spark context
 		sc.close();
