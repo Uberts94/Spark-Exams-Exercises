@@ -34,8 +34,26 @@ public class SparkDriver {
 
 		
 		// Read the content of the input file/folder
-		JavaRDD<String> inputRDD = sc.textFile(inputPath);
-
+		JavaRDD<String> inputRDD = sc.textFile(inputPath).cache();
+		
+		float max = inputRDD.map(line -> {
+			String[] sensor = line.split(",");
+			return Float.parseFloat(sensor[2]);
+ 		}).reduce((e1, e2) -> {
+ 			if(e1 > e2) return e1;
+ 			else return e2;
+ 		});
+		
+		JavaRDD<String> outputRDD = inputRDD.filter(line -> {
+			String[] sensor = line.split(",");
+			if(Float.parseFloat(sensor[2]) == max) return true;
+			else return false;
+		}).map(line -> {
+			String[] sensor = line.split(",");
+			return sensor[1];
+		});
+		
+		outputRDD.saveAsTextFile(outputPath);
 
 		// Close the Spark context
 		sc.close();
