@@ -2,6 +2,9 @@ package it.polito.bigdata.spark.example;
 
 import org.apache.spark.api.java.*;
 import org.apache.spark.SparkConf;
+
+import java.util.List;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 	
@@ -34,8 +37,13 @@ public class SparkDriver {
 		// Read the content of the input file/folder  
 		JavaRDD<String> inputRDD = sc.textFile(inputPath);
 
-		
+		List<Float> top3Max = inputRDD.map(sensor -> {
+			String[] entry = sensor.split(",");
+			return Float.parseFloat(entry[2]);
+		}).top(3);
 
+		System.out.println("Top 3 pollution values: "+top3Max.toString());
+		
 		// Close the Spark context
 		sc.close();
 	}
