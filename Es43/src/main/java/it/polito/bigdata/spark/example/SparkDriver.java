@@ -25,13 +25,15 @@ public class SparkDriver {
 		String inputPath2;
 		String outputPath1;
 		String outputPath2;
+		String outputPath3;
 		int threshold;
 		
 		inputPath1=args[0];
 		inputPath2=args[1];
 		outputPath1=args[2];
 		outputPath2=args[3];
-		threshold=Integer.parseInt(args[4]);
+		outputPath3=args[4];
+		threshold=Integer.parseInt(args[5]);
 		List<String> timeslots = new ArrayList<String>();
 		timeslots.add("[0-3]");
 		timeslots.add("[4-7]");
@@ -52,7 +54,7 @@ public class SparkDriver {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
 		
-		// Read the content of the input file/folder
+		// Read the content of the input file/folder1
 		JavaRDD<String> readingsRDD = sc.textFile(inputPath1).cache();
 		
 		// Task1
@@ -96,9 +98,29 @@ public class SparkDriver {
  		}).filter(e -> {
  			if(e._1 > 0.5) return true;
  			else return false;
- 		}).sortByKey(false).mapToPair(e -> new Tuple2<Tuple2<String, String>, Float>(new Tuple2<String, String>(e._2()._1(), e._2()._2()), e._1()));
+ 		}).sortByKey(false).mapToPair(e -> new Tuple2<Tuple2<String, String>, Float>
+ 								(new Tuple2<String, String>(e._2()._1(), e._2()._2()), e._1()));
 		
 		criticalPercTimeslot.saveAsTextFile(outputPath2);
+		
+		// Read the content of the input file/folder2
+		JavaRDD<String> neighborsRDD = sc.textFile(inputPath2);
+		
+		//<StationID, Tuple2<Tuple2<Timestamp, freeSlots>, List<neighbors>
+		JavaPairRDD<String, Tuple2<Tuple2<String, Integer>, List<String>>> dataRDD = readingsRDD.mapToPair(line -> {
+			String[] reading = line.split(",");
+			return new Tuple2<String, Tuple2<String, Integer>>(reading[0], new Tuple2<String, Integer>(reading[1], Integer.parseInt(reading[5])));
+		}).join(neighborsRDD.mapToPair(line ->{
+			String[] entry = line.split(",");
+			String[] neighbors = entry[1].split("\\s+");
+			List<String> list = new ArrayList<String>();
+			for(String n : neighbors) list.add(n);
+			return new Tuple2<String, List<String>>(entry[0], list);
+		}));
+		
+		dataRDD.saveAsTextFile(outputPath3);
+		
+		// Task 3 is INSANE! lol
 		
 		// Close the Spark context
 		sc.close();
