@@ -36,7 +36,12 @@ public class SparkDriver {
 		// Read the content of the input file/folder 
 		JavaRDD<String> inputRDD = sc.textFile(inputPath);
 
+		JavaRDD<String> distinctGoogleIP = inputRDD.filter(line -> line.contains("google")).map(google -> {
+			String[] entry = google.split("\\s+-\\s+-\\s+");
+			return entry[0];
+		}).distinct();
 		
+		distinctGoogleIP.saveAsTextFile(outputPath);
 
 		// Close the Spark context
 		sc.close();
