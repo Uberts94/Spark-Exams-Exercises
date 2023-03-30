@@ -16,41 +16,30 @@ public class SparkDriver {
 
 		String inputPath;
 		String outputPath;
-		String prefix;
 		
 		inputPath=args[0];
 		outputPath=args[1];
-		prefix=args[2];
 
 	
 		// Create a configuration object and set the name of the application
-		SparkConf conf=new SparkConf().setAppName("Spark Lab #5");
+		SparkConf conf=new SparkConf().setAppName("Es30").setMaster("local");
 		
 		// Use the following command to create the SparkConf object if you want to run
 		// your application inside Eclipse.
 		// Remember to remove .setMaster("local") before running your application on the cluster
-		// SparkConf conf=new SparkConf().setAppName("Spark Lab #5").setMaster("local");
+		// SparkConf conf=new SparkConf().setAppName("Es30").setMaster("local");
 		
 		// Create a Spark Context object
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
 		
 		// Read the content of the input file/folder
-		// Each element/string of wordFreqRDD corresponds to one line of the input data 
-		// (i.e, one pair "word\tfreq")  
-		JavaRDD<String> wordFreqRDD = sc.textFile(inputPath);
+		JavaRDD<String> inputRDD = sc.textFile(inputPath);
 
-		/*
-		 * Task 1
-		 .......
-		 .......
-		*/
+		JavaRDD<String> filteredRDD = inputRDD.filter(line -> line.contains("google."));
 		
-		/*
-		 * Task 2
-		 .......
-		 .......
-		 */
+		filteredRDD.saveAsTextFile(outputPath);
+		
 
 		// Close the Spark context
 		sc.close();
