@@ -43,7 +43,7 @@ public class SparkDriver {
 		// Read the content of the input file/folder
 		JavaRDD<String> readingsRDD = sc.textFile(inputPath1);
 		
-		JavaRDD<String> criticalStationPerc = readingsRDD.mapToPair(line -> {
+		JavaPairRDD<String, Float> criticalStationPerc = readingsRDD.mapToPair(line -> {
 			String[] reading = line.split(",");
 			if(Integer.parseInt(reading[5]) < threshold) 
 				return new Tuple2<String, Tuple2<Integer, Integer>>(reading[0], new Tuple2<Integer, Integer>(1, 1));
@@ -55,8 +55,8 @@ public class SparkDriver {
 		}).filter(e -> {
 			if (e._1 > 0.2) return true;
 			else return false;
-		}).sortByKey(false).map(e -> {
-			return e._2();
+		}).sortByKey(false).mapToPair(e -> {
+			return new Tuple2<String, Float>(e._2(), e._1());
 		});
         
 		criticalStationPerc.saveAsTextFile(outputPath);
