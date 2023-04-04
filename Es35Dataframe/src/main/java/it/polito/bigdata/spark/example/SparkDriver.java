@@ -2,14 +2,10 @@ package it.polito.bigdata.spark.example;
 
 import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import static org.apache.spark.sql.functions.max;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
-	
 public class SparkDriver {
 	
 	public static void main(String[] args) {
